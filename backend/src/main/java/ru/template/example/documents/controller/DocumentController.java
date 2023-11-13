@@ -1,6 +1,9 @@
 package ru.template.example.documents.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,15 +17,19 @@ import ru.template.example.documents.controller.dto.IdDto;
 import ru.template.example.documents.controller.dto.IdsDto;
 import ru.template.example.documents.controller.dto.Status;
 import ru.template.example.documents.service.DocumentService;
+import ru.template.example.kafka.KafkaConsumer;
+import ru.template.example.kafka.KafkaProducer;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/documents")
 public class DocumentController {
 
-    @Autowired
-    private DocumentService service;
+    private final DocumentService service;
+    private final KafkaProducer producer;
+    private final KafkaConsumer consumer;
 
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -32,7 +39,23 @@ public class DocumentController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<DocumentDto> get() {
+    public List<DocumentDto> get() throws JSONException {
+        if(!consumer.checkMessages()) {
+            while(!consumer.checkMessages()) {
+                JSONObject data = consumer.getRecentMessage();
+                Long id = data.getLong("id");
+                DocumentDto document = service.get(id);
+                switch (data.get("status").toString()) {
+                    case "ACCEPTED": {
+                        document.setStatus(Status.of("ACCEPTED", "Принят"));
+                    } break;
+                    case "REJECTED": {
+                        document.setStatus(Status.of("REJECTED", "Отклонен"));
+                    } break;
+                }
+                service.update(document);
+            }
+        }
         return service.findAll();
     }
 
@@ -42,6 +65,7 @@ public class DocumentController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public DocumentDto send(@RequestBody IdDto id) {
         DocumentDto document = service.get(id.getId());
+        producer.sendMessage(new Gson().toJson(document));
         document.setStatus(Status.of("IN_PROCESS", "В обработке"));
         return service.update(document);
     }

@@ -47,4 +47,5 @@ public interface DocumentService {
      * @return документ
      */
     DocumentDto get(Long id);
+
 }

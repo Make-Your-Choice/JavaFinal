@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import ru.template.example.documents.controller.dto.DocumentDto;
-import ru.template.example.documents.store.DocumentStore;
 
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +25,7 @@ public class DocumentServiceImplTest {
 
     @BeforeEach
     public void before() {
-        DocumentStore.getInstance().getDocumentDtos().clear();
+        /*DocumentStore.getInstance().getDocumentDtos().clear();*/
     }
 
     @Test

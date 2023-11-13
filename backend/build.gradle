@@ -1,9 +1,12 @@
 plugins {
     id 'org.springframework.boot' version "${springBootVersion}"
     id 'java'
+    id "org.liquibase.gradle" version "${liquibaseVersion}"
 }
 
+apply plugin: 'org.liquibase.gradle'
 apply plugin: 'io.spring.dependency-management'
+
 
 group 'org.example'
 version '1.0-SNAPSHOT'
@@ -21,6 +24,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('co.elastic.logging:logback-ecs-encoder:1.5.0')
     implementation('org.apache.commons:commons-lang3:3.12.0')
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
 
     compileOnly("org.projectlombok:lombok:1.18.28")
     annotationProcessor("org.projectlombok:lombok:1.18.28")
@@ -28,10 +32,52 @@ dependencies {
     testImplementation('org.testcontainers:postgresql:1.17.6')
 
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
-}
 
+    implementation('org.postgresql:postgresql:42.6.0')
+    implementation('ma.glasnost.orika:orika-core:1.5.4')
+
+    liquibaseRuntime('org.liquibase:liquibase-core:3.8.1')
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:2.1.1')
+    liquibaseRuntime('ch.qos.logback:logback-classic:1.2.6')
+    liquibaseRuntime('jakarta.xml.bind:jakarta.xml.bind-api:2.3.2')
+    liquibaseRuntime('org.postgresql:postgresql:42.2.12')
+
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.json:json:20231013")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.springframework.boot:spring-boot-starter-aop:2.7.16")
+
+}
 
 test {
     include('ru/template/example/**')
     useJUnitPlatform()
 }
+
+ext {
+    db_url = "jdbc:postgresql://localhost:5432/docs"
+    db_user = "postgres"
+    db_pass = "1234"
+}
+
+
+liquibase {
+    activities {
+        main {
+            changeLogFile "src/main/resources/migrations/db.changelog-master.xml"
+            url db_url
+            username db_user
+            password db_pass
+            logLevel "info"
+            driver "org.postgresql.Driver"
+        }
+    }
+}
+
+subprojects{
+    tasks.withType(Test).configureEach{
+        jvmArgs = jvmArgs + ['--add-opens java.base/java.lang=ALL-UNNAMED']
+    }
+}
+

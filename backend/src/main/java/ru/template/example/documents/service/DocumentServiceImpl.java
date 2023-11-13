@@ -1,19 +1,23 @@
 package ru.template.example.documents.service;
 
+import lombok.RequiredArgsConstructor;
+import ma.glasnost.orika.MapperFacade;
+import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.stereotype.Service;
 import ru.template.example.documents.controller.dto.DocumentDto;
 import ru.template.example.documents.controller.dto.Status;
-import ru.template.example.documents.store.DocumentStore;
+import ru.template.example.documents.entity.Document;
+import ru.template.example.documents.repository.DocumentRepository;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
+
+    private final DocumentRepository documentRepository;
+    private final MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();
 
     public DocumentDto save(DocumentDto documentDto) {
         if (documentDto.getId() == null) {
@@ -23,45 +27,71 @@ public class DocumentServiceImpl implements DocumentService {
         if (documentDto.getStatus() == null) {
             documentDto.setStatus(Status.of("NEW", "Новый"));
         }
-        DocumentStore.getInstance().getDocumentDtos().add(documentDto);
+        Document entity = mapperFacade.map(documentDto, Document.class);
+        entity.setStatus(documentDto.getStatus().getCode());
+        documentRepository.save(entity);
         return documentDto;
     }
 
 
     public DocumentDto update(DocumentDto documentDto) {
-        List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
-        Optional<DocumentDto> dto = documentDtos.stream()
-                .filter(d -> d.getId().equals(documentDto.getId())).findFirst();
-        if (dto.isPresent()) {
-            delete(documentDto.getId());
+        //List<DocumentDto> documentDtos = mapperFacade.mapAsList(documentRepository.findAll(), DocumentDto.class);
+        /*Optional<DocumentDto> dto = documentDtos.stream()
+                .filter(d -> d.getId().equals(documentDto.getId())).findFirst();*/
+        DocumentDto dto = get(documentDto.getId());
+        if (dto != null) {
             save(documentDto);
         }
         return documentDto;
     }
 
     public void delete(Long id) {
-        List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
-        List<DocumentDto> newList = documentDtos.stream()
-                .filter(d -> !d.getId().equals(id)).collect(Collectors.toList());
-        documentDtos.clear();
-        documentDtos.addAll(newList);
+        if(documentRepository.findById(id).isPresent()) {
+            documentRepository.deleteById(id);
+        }
     }
 
     public void deleteAll(Set<Long> ids) {
-        List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
-        List<DocumentDto> newList = documentDtos.stream()
-                .filter(d -> !ids.contains(d.getId())).collect(Collectors.toList());
-        documentDtos.clear();
-        documentDtos.addAll(newList);
+        for (Long id: ids) {
+            delete(id);
+        }
     }
 
     public List<DocumentDto> findAll() {
-        return DocumentStore.getInstance().getDocumentDtos();
+        List<Document> documents = mapperFacade.mapAsList(documentRepository.findAll(), Document.class);
+        List<DocumentDto> documentDtos = new ArrayList<>();
+        for(Document document: documents) {
+            DocumentDto dto = mapperFacade.map(document, DocumentDto.class);
+            documentDtos.add(setDtoStatus(document.getStatus(), dto));
+        }
+        return documentDtos;
     }
 
     public DocumentDto get(Long id) {
-        List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
+        Document document = mapperFacade.map(documentRepository.getOne(id), Document.class);
+        DocumentDto dto = mapperFacade.map(document, DocumentDto.class);
+        return setDtoStatus(document.getStatus(), dto);
+        //return mapperFacade.map(documentRepository.getOne(id), DocumentDto.class);
+        /*List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
         return documentDtos.stream()
-                .filter(d -> d.getId().equals(id)).findFirst().orElseThrow(() -> new IllegalStateException("cannot find " + id));
+                .filter(d -> d.getId().equals(id)).findFirst().orElseThrow(() -> new IllegalStateException("cannot find " + id));*/
+    }
+
+    public DocumentDto setDtoStatus(String status, DocumentDto dto) {
+        switch (status) {
+            case "NEW": {
+                dto.setStatus(Status.of("NEW", "Новый"));
+            } break;
+            case "IN_PROCESS": {
+                dto.setStatus(Status.of("IN_PROCESS", "В обработке"));
+            } break;
+            case "ACCEPTED": {
+                dto.setStatus(Status.of("ACCEPTED", "Принят"));
+            } break;
+            case "REJECTED": {
+                dto.setStatus(Status.of("REJECTED", "Отклонен"));
+            } break;
+        }
+        return dto;
     }
 }

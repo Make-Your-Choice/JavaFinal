@@ -1,14 +1,12 @@
 package ru.template.example.documents.controller.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
 @Data
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class DocumentDto {
