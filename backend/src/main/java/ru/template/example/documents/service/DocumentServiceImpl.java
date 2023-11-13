@@ -1,9 +1,8 @@
 package ru.template.example.documents.service;
 
 import lombok.RequiredArgsConstructor;
-import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.apache.commons.lang3.RandomUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import ru.template.example.documents.controller.dto.DocumentDto;
 import ru.template.example.documents.controller.dto.Status;
@@ -17,8 +16,7 @@ import java.util.*;
 public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepository documentRepository;
-    private final MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();
-
+    private final ModelMapper modelMapper = new ModelMapper();
     public DocumentDto save(DocumentDto documentDto) {
         if (documentDto.getId() == null) {
             documentDto.setId(RandomUtils.nextLong(0L, 999L));
@@ -27,7 +25,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (documentDto.getStatus() == null) {
             documentDto.setStatus(Status.of("NEW", "Новый"));
         }
-        Document entity = mapperFacade.map(documentDto, Document.class);
+        Document entity = modelMapper.map(documentDto, Document.class);
         entity.setStatus(documentDto.getStatus().getCode());
         documentRepository.save(entity);
         return documentDto;
@@ -58,18 +56,18 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     public List<DocumentDto> findAll() {
-        List<Document> documents = mapperFacade.mapAsList(documentRepository.findAll(), Document.class);
+        List<Document> documents = documentRepository.findAll();
         List<DocumentDto> documentDtos = new ArrayList<>();
         for(Document document: documents) {
-            DocumentDto dto = mapperFacade.map(document, DocumentDto.class);
+            DocumentDto dto = modelMapper.map(document, DocumentDto.class);
             documentDtos.add(setDtoStatus(document.getStatus(), dto));
         }
         return documentDtos;
     }
 
     public DocumentDto get(Long id) {
-        Document document = mapperFacade.map(documentRepository.getOne(id), Document.class);
-        DocumentDto dto = mapperFacade.map(document, DocumentDto.class);
+        Document document = documentRepository.getOne(id);
+        DocumentDto dto = modelMapper.map(document, DocumentDto.class);
         return setDtoStatus(document.getStatus(), dto);
         //return mapperFacade.map(documentRepository.getOne(id), DocumentDto.class);
         /*List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();

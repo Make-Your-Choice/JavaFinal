@@ -28,12 +28,12 @@ public class LoggingAspect {
     public void logInfoMethodCallMethodArgs(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
         String methodName = joinPoint.getSignature().getName();
-        logger.log(Level.INFO, "Название метода: " + methodName + ", аргументы: " + List.of(args));
+        logger.log(Level.INFO, "Method name: " + methodName + ", args: " + List.of(args));
     }
 
     @AfterReturning(pointcut = "pointcut()", returning = "result")
     public void logAfterReeturning(JoinPoint joinPoint, Object result) {
         String methodName = joinPoint.getSignature().getName();
-        logger.log(Level.INFO, "Метод " + methodName + " вернул значение: " + result);
+        logger.log(Level.INFO, "Method " + methodName + " returned value: " + result);
     }
 }

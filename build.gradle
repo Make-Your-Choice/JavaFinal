@@ -16,6 +16,6 @@ dependencies {
 
 subprojects{
     tasks.withType(Test).configureEach{
-        jvmArgs = jvmArgs + ['--add-opens java.base/java.lang=ALL-UNNAMED']
+        jvmArgs =  ['--add-opens java.base/java.lang=ALL-UNNAMED', '--add-opens java.base/java.lang.reflect=ALL-UNNAMED']
     }
 }
