@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.template.example.documents.controller.dto.DocumentDto;
-import ru.template.example.documents.controller.dto.IdDto;
-import ru.template.example.documents.controller.dto.IdsDto;
-import ru.template.example.documents.controller.dto.Status;
+import ru.template.example.documents.controller.dto.*;
 import ru.template.example.documents.service.DocumentService;
+import ru.template.example.documents.service.MessageOutService;
 import ru.template.example.kafka.KafkaConsumer;
 import ru.template.example.kafka.KafkaProducer;
 
@@ -30,6 +28,7 @@ public class DocumentController {
     private final DocumentService service;
     private final KafkaProducer producer;
     private final KafkaConsumer consumer;
+    private final MessageOutService messageOutService;
 
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -40,7 +39,7 @@ public class DocumentController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<DocumentDto> get() throws JSONException {
-        if(!consumer.checkMessages()) {
+        /*if(!consumer.checkMessages()) {
             while(!consumer.checkMessages()) {
                 JSONObject data = consumer.getRecentMessage();
                 Long id = data.getLong("id");
@@ -55,7 +54,7 @@ public class DocumentController {
                 }
                 service.update(document);
             }
-        }
+        }*/
         return service.findAll();
     }
 
@@ -65,8 +64,11 @@ public class DocumentController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public DocumentDto send(@RequestBody IdDto id) {
         DocumentDto document = service.get(id.getId());
-        producer.sendMessage(new Gson().toJson(document));
+        //producer.sendMessage(new Gson().toJson(document));
         document.setStatus(Status.of("IN_PROCESS", "В обработке"));
+        MessageOutDto messageOut = new MessageOutDto();
+        messageOut.setPayload(new Gson().toJson(document));
+        messageOutService.save(messageOut);
         return service.update(document);
     }
 

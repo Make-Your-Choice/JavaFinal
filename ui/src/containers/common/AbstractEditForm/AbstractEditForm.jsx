@@ -58,8 +58,10 @@ export default function AbstractEditForm({module, stateName, newItem, renderFiel
                 render={({handleSubmit, form, values}) => (
                     <form onSubmit={handleSubmit}>
                         <FieldsComponent item={values} form={form}/>
-                        <Button style={{border: "solid"}} onClick={handleSubmit}>{'Создать'}</Button>
-                        <Button style={{border: "solid"}} onClick={onClose}>Отменить</Button>
+                        <div style={{display: "flex", justifyContent: "space-between", marginTop: "20px"}}>
+                            <Button style={{border: "solid"}} onClick={onClose}>Отменить</Button>
+                            <Button style={{border: "solid"}} onClick={handleSubmit}>{'Создать'}</Button>
+                        </div>
                     </form>
                 )}
             />

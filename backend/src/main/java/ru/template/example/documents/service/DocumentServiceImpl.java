@@ -66,7 +66,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     public DocumentDto get(Long id) {
-        Document document = documentRepository.getOne(id);
+        Document document = documentRepository.findById(id).get();
         DocumentDto dto = modelMapper.map(document, DocumentDto.class);
         return setDtoStatus(document.getStatus(), dto);
         //return mapperFacade.map(documentRepository.getOne(id), DocumentDto.class);
