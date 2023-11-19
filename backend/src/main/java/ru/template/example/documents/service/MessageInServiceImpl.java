@@ -71,4 +71,10 @@ public class MessageInServiceImpl implements MessageInService {
         Optional<MessageIn> message = messageInRepository.findFirstByIsAcceptedFalse();
         return Optional.ofNullable(modelMapper.map(message, MessageInDto.class));
     }
+
+    @Override
+    public Optional<MessageInDto> getFirstByPayload(String payload) {
+        Optional<MessageIn> message = messageInRepository.findFirstByPayloadEquals(payload);
+        return Optional.ofNullable(modelMapper.map(message, MessageInDto.class));
+    }
 }

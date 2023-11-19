@@ -32,6 +32,7 @@ dependencies {
     testImplementation('org.testcontainers:postgresql:1.17.6')
 
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     implementation('org.postgresql:postgresql:42.6.0')
     implementation("org.modelmapper:modelmapper:3.2.0")
@@ -60,8 +61,8 @@ test {
     useJUnitPlatform()
 }
 
-ext {
-    db_url = "jdbc:postgresql://localhost:5432/docs"
+/*ext {
+    db_url = "jdbc:postgresql://db:5432/docs"
     db_user = "postgres"
     db_pass = "1234"
 }
@@ -78,7 +79,7 @@ liquibase {
             driver "org.postgresql.Driver"
         }
     }
-}
+}*/
 
 subprojects{
     tasks.withType(Test).configureEach{

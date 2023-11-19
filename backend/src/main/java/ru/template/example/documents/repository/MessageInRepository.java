@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface MessageInRepository extends JpaRepository<MessageIn, Long> {
     Optional<MessageIn> findFirstByIsAcceptedFalse();
+    Optional<MessageIn> findFirstByPayloadEquals(String payload);
 }

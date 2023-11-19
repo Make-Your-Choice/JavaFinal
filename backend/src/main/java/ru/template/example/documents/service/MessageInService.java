@@ -12,4 +12,6 @@ public interface MessageInService {
     List<MessageInDto> findAll();
     MessageInDto get(Long id);
     Optional<MessageInDto> getFirstNotAccepted();
+
+    Optional<MessageInDto> getFirstByPayload(String payload);
 }

@@ -57,6 +57,7 @@
     "start": "webpack serve --config config/dev.webpack.config.js",
     "build": "webpack --config config/prod.webpack.config.js"
   },
+  "proxy": "http://host.docker.internal:8888",
   "prettier": {
     "trailingComma": "all"
   },
