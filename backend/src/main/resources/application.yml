@@ -10,7 +10,7 @@ cors:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://db:5432/docs
+    url: jdbc:postgresql://localhost:5432/docs #jdbc:postgresql://db:5432/docs
     username: postgres
     password: 1234
   liquibase:
@@ -28,4 +28,4 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: localhost:29092 #kafka:9092

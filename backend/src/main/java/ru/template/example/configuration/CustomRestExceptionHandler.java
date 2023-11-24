@@ -12,17 +12,31 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.management.InstanceAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 /**
  * Intercepts controller exception
  */
 @ControllerAdvice
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(InstanceAlreadyExistsException.class)
+    public ResponseEntity<RestApiError> payloadExistsException(final InstanceAlreadyExistsException e) {
+        logger.error("Duplicated payload error", e);
+        RestApiError restApiError = new RestApiError("Duplicated payload error", List.of(e.getMessage()));
+        return new ResponseEntity<>(restApiError, new HttpHeaders(), BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<RestApiError> incorrectStatusException(final IllegalArgumentException e) {
+        logger.error("Incorrect payload arguments error", e);
+        RestApiError restApiError = new RestApiError("Incorrect payload arguments error", List.of(e.getMessage()));
+        return new ResponseEntity<>(restApiError, new HttpHeaders(), BAD_REQUEST);
+    }
 
     /**
      * 400

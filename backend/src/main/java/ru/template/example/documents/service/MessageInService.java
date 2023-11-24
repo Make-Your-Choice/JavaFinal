@@ -7,11 +7,9 @@ import java.util.Optional;
 
 public interface MessageInService {
     MessageInDto save(MessageInDto messageInDto);
-    void delete(Long id);
-    MessageInDto update(MessageInDto messageInDto);
-    List<MessageInDto> findAll();
-    MessageInDto get(Long id);
-    Optional<MessageInDto> getFirstNotAccepted();
 
+    List<MessageInDto> findAll();
+    Optional<MessageInDto> get(Long id);
+    Optional<MessageInDto> getFirstNotAccepted();
     Optional<MessageInDto> getFirstByPayload(String payload);
 }

@@ -3,10 +3,12 @@ package ru.template.example.documents.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.template.example.documents.controller.dto.MessageOutDto;
 import ru.template.example.documents.entity.MessageOut;
 import ru.template.example.documents.repository.MessageOutRepository;
+import ru.template.example.kafka.KafkaProducer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ public class MessageOutServiceImpl implements MessageOutService {
 
     private final MessageOutRepository messageOutRepository;
     private final ModelMapper modelMapper = new ModelMapper();
+    private final KafkaProducer producer;
 
     @Override
     public MessageOutDto save(MessageOutDto messageOutDto) {
@@ -32,22 +35,6 @@ public class MessageOutServiceImpl implements MessageOutService {
         }
         MessageOut entity = modelMapper.map(messageOutDto, MessageOut.class);
         messageOutRepository.save(entity);
-        return messageOutDto;
-    }
-
-    @Override
-    public void delete(Long id) {
-        if(messageOutRepository.findById(id).isPresent()) {
-            messageOutRepository.deleteById(id);
-        }
-    }
-
-    @Override
-    public MessageOutDto update(MessageOutDto messageOutDto) {
-        MessageOutDto dto = get(messageOutDto.getId());
-        if (dto != null) {
-            save(messageOutDto);
-        }
         return messageOutDto;
     }
 
@@ -71,5 +58,18 @@ public class MessageOutServiceImpl implements MessageOutService {
     public Optional<MessageOutDto> getFirstNotSent() {
         Optional<MessageOut> message = messageOutRepository.findFirstByIsSentFalse();
         return Optional.ofNullable(modelMapper.map(message, MessageOutDto.class));
+    }
+
+    @Scheduled(fixedDelay = 2000)
+    public void checkOutMessages() {
+        if(!findAll().isEmpty()) {
+            Optional<MessageOutDto> messageOutDto = getFirstNotSent();
+            if(messageOutDto.isPresent()) {
+                MessageOutDto messageOut = messageOutDto.get();
+                producer.sendMessage(messageOut.getPayload());
+                messageOut.setIsSent(true);
+                save(messageOut);
+            }
+        }
     }
 }

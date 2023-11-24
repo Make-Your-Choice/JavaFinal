@@ -2,12 +2,15 @@ package ru.template.example.documents.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomUtils;
+import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import ru.template.example.documents.controller.dto.DocumentDto;
 import ru.template.example.documents.controller.dto.MessageInDto;
-import ru.template.example.documents.controller.dto.MessageOutDto;
+import ru.template.example.documents.controller.dto.Status;
+import ru.template.example.documents.entity.Document;
 import ru.template.example.documents.entity.MessageIn;
-import ru.template.example.documents.entity.MessageOut;
 import ru.template.example.documents.repository.MessageInRepository;
 
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ public class MessageInServiceImpl implements MessageInService {
 
     private final MessageInRepository messageInRepository;
     private final ModelMapper modelMapper = new ModelMapper();
+    private final DocumentService documentService;
 
     @Override
     public MessageInDto save(MessageInDto messageInDto) {
@@ -35,22 +39,6 @@ public class MessageInServiceImpl implements MessageInService {
     }
 
     @Override
-    public void delete(Long id) {
-        if(messageInRepository.findById(id).isPresent()) {
-            messageInRepository.deleteById(id);
-        }
-    }
-
-    @Override
-    public MessageInDto update(MessageInDto messageInDto) {
-        MessageInDto dto = get(messageInDto.getId());
-        if (dto != null) {
-            save(messageInDto);
-        }
-        return messageInDto;
-    }
-
-    @Override
     public List<MessageInDto> findAll() {
         List<MessageIn> messages = messageInRepository.findAll();
         List<MessageInDto> messageInDtos = new ArrayList<>();
@@ -61,9 +49,13 @@ public class MessageInServiceImpl implements MessageInService {
     }
 
     @Override
-    public MessageInDto get(Long id) {
-        MessageIn message = messageInRepository.getOne(id);
-        return modelMapper.map(message, MessageInDto.class);
+    public Optional<MessageInDto> get(Long id) {
+        Optional<MessageIn> message = messageInRepository.findById(id);
+        if(message.isPresent()) {
+            MessageIn messageIn = message.get();
+            return Optional.ofNullable(modelMapper.map(messageIn, MessageInDto.class));
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -76,5 +68,29 @@ public class MessageInServiceImpl implements MessageInService {
     public Optional<MessageInDto> getFirstByPayload(String payload) {
         Optional<MessageIn> message = messageInRepository.findFirstByPayloadEquals(payload);
         return Optional.ofNullable(modelMapper.map(message, MessageInDto.class));
+    }
+
+    @Scheduled(fixedDelay = 2000)
+    public void checkInMessages() {
+        if(!findAll().isEmpty()) {
+            Optional<MessageInDto> messageInDto = getFirstNotAccepted();
+            if(messageInDto.isPresent()) {
+                MessageInDto messageIn = messageInDto.get();
+                JSONObject data = new JSONObject(messageIn.getPayload());
+                Long id = data.getLong("id");
+                DocumentDto document = documentService.get(id).get();
+                switch (data.get("status").toString()) {
+                    case "ACCEPTED": {
+                        document.setStatus(Status.of("ACCEPTED", "Принят"));
+                    } break;
+                    case "REJECTED": {
+                        document.setStatus(Status.of("REJECTED", "Отклонен"));
+                    } break;
+                }
+                documentService.update(document);
+                messageIn.setIsAccepted(true);
+                save(messageIn);
+            }
+        }
     }
 }

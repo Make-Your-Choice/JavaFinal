@@ -23,16 +23,6 @@ public class KafkaTopicConfig {
         return new KafkaAdmin(configs);
     }
 
-    /*@Bean
-    public NewTopic topic1() {
-        return new NewTopic("documents", 1, (short) 1);
-    }*/
-
-    @Bean
-    public NewTopic topic1() {
-        return new NewTopic("docs", 1, (short) 1);
-    }
-
     @Bean
     public NewTopic topic_in() {
         return new NewTopic("docs_in", 1, (short) 1);

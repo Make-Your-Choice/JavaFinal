@@ -17,6 +17,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepository documentRepository;
     private final ModelMapper modelMapper = new ModelMapper();
+
+    @Override
     public DocumentDto save(DocumentDto documentDto) {
         if (documentDto.getId() == null) {
             documentDto.setId(RandomUtils.nextLong(0L, 999L));
@@ -31,30 +33,30 @@ public class DocumentServiceImpl implements DocumentService {
         return documentDto;
     }
 
-
+    @Override
     public DocumentDto update(DocumentDto documentDto) {
-        //List<DocumentDto> documentDtos = mapperFacade.mapAsList(documentRepository.findAll(), DocumentDto.class);
-        /*Optional<DocumentDto> dto = documentDtos.stream()
-                .filter(d -> d.getId().equals(documentDto.getId())).findFirst();*/
-        DocumentDto dto = get(documentDto.getId());
-        if (dto != null) {
+        Optional<DocumentDto> dto = get(documentDto.getId());
+        if (dto.isPresent()) {
             save(documentDto);
         }
         return documentDto;
     }
 
+    @Override
     public void delete(Long id) {
         if(documentRepository.findById(id).isPresent()) {
             documentRepository.deleteById(id);
         }
     }
 
+    @Override
     public void deleteAll(Set<Long> ids) {
         for (Long id: ids) {
             delete(id);
         }
     }
 
+    @Override
     public List<DocumentDto> findAll() {
         List<Document> documents = documentRepository.findAll();
         List<DocumentDto> documentDtos = new ArrayList<>();
@@ -65,14 +67,21 @@ public class DocumentServiceImpl implements DocumentService {
         return documentDtos;
     }
 
-    public DocumentDto get(Long id) {
-        Document document = documentRepository.findById(id).get();
-        DocumentDto dto = modelMapper.map(document, DocumentDto.class);
-        return setDtoStatus(document.getStatus(), dto);
-        //return mapperFacade.map(documentRepository.getOne(id), DocumentDto.class);
-        /*List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
-        return documentDtos.stream()
-                .filter(d -> d.getId().equals(id)).findFirst().orElseThrow(() -> new IllegalStateException("cannot find " + id));*/
+    @Override
+    public Optional<DocumentDto> get(Long id) {
+        Optional<Document> document = documentRepository.findById(id);
+        if(document.isPresent()) {
+            Document doc = document.get();
+            DocumentDto dto = modelMapper.map(doc, DocumentDto.class);
+            return Optional.ofNullable(setDtoStatus(doc.getStatus(), dto));
+        }
+        return Optional.empty();
+
+    }
+
+    @Override
+    public DocumentDto send(DocumentDto dto) {
+        return save(setDtoStatus("IN_PROCESS", dto));
     }
 
     public DocumentDto setDtoStatus(String status, DocumentDto dto) {
@@ -91,5 +100,13 @@ public class DocumentServiceImpl implements DocumentService {
             } break;
         }
         return dto;
+    }
+
+    @Override
+    public boolean checkDocumentById(Long id) {
+        if(documentRepository.findById(id).isPresent()) {
+            return true;
+        }
+        return false;
     }
 }

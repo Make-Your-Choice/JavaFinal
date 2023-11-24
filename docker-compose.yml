@@ -30,15 +30,17 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
     ports:
-      - "5432:5432"
+      - "5433:5432"
   api:
     image: docker-java-jar
     ports:
       - '8888:8888'
     environment:
       SERVER_PORT: 8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/docs
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/docs #jdbc:postgresql://db:5432/docs
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:29092 #kafka:9092
     depends_on:
       - db
   ui:

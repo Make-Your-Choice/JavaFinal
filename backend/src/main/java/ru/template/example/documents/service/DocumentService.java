@@ -3,6 +3,7 @@ package ru.template.example.documents.service;
 import ru.template.example.documents.controller.dto.DocumentDto;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -46,6 +47,10 @@ public interface DocumentService {
      * @param id идентификатор
      * @return документ
      */
-    DocumentDto get(Long id);
+    Optional<DocumentDto> get(Long id);
+
+    DocumentDto send(DocumentDto dto);
+
+    boolean checkDocumentById(Long id);
 
 }
