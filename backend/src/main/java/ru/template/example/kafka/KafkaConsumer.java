@@ -26,25 +26,30 @@ public class KafkaConsumer {
     // containerFactory - не обязательный параметр, нужен если хочется дополнительно иметь какие то настройки
     @KafkaListener(topics = "docs_out", groupId = "group_id", containerFactory = "kafkaListenerContainerFactory")
     public void consume(@Payload String message) throws JSONException, InstanceAlreadyExistsException {
-        if(!messageInService.getFirstByPayload(message).isPresent()) {
-            JSONObject data = new JSONObject(message);
-            if(documentService.checkDocumentById(data.getLong("id"))) {
-                if(data.get("status").equals("ACCEPTED") ||
-                        data.get("status").equals("REJECTED")) {
-                    MessageInDto messageIn = new MessageInDto();
-                    messageIn.setPayload(message);
-                    messageInService.save(messageIn);
+        if(message.contains("id") && message.contains("status")) {
+            if(!messageInService.getFirstByPayload(message).isPresent()) {
+                JSONObject data = new JSONObject(message);
+                if(documentService.checkDocumentById(data.getLong("id"))) {
+                    if(data.get("status").equals("ACCEPTED") ||
+                            data.get("status").equals("REJECTED")) {
+                        MessageInDto messageIn = new MessageInDto();
+                        messageIn.setPayload(message);
+                        messageInService.save(messageIn);
+                    } else {
+                        log.error("Status " + data.getString("status") + " is not acceptable");
+                        throw new IllegalArgumentException("Status " + data.getString("status") + " is not acceptable");
+                    }
                 } else {
-                    log.error("Status " + data.getString("status") + " is not acceptable");
-                    throw new IllegalArgumentException("Status " + data.getString("status") + " is not acceptable");
+                    log.error("Id " + data.getLong("id") + " does not exist");
+                    throw new IllegalArgumentException("Id " + data.getLong("id") + " does not exist");
                 }
             } else {
-                log.error("Id " + data.getLong("id") + " does not exist");
-                throw new IllegalArgumentException("Id " + data.getLong("id") + " does not exist");
+                log.error("Payload " + message + " already exists");
+                throw new InstanceAlreadyExistsException("Payload " + message + " already exists");
             }
         } else {
-            log.error("Payload " + message + " already exists");
-            throw new InstanceAlreadyExistsException("Payload " + message + " already exists");
+            log.error("Incorrect payload format " + message);
+            throw new IllegalArgumentException("Incorrect payload format " + message);
         }
     }
 }

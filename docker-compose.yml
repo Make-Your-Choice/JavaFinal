@@ -33,6 +33,9 @@ services:
       - "5433:5432"
   api:
     image: docker-java-jar
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - '8888:8888'
     environment:
@@ -45,6 +48,9 @@ services:
       - db
   ui:
     image: docker-react
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
     ports:
       - '3006:3005'
     volumes:
