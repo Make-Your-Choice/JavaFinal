@@ -6,10 +6,16 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * Класс дто id документа
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class IdDto {
+    /**
+     * Идентификатор
+     */
     @NotNull
     private Long id;
 }

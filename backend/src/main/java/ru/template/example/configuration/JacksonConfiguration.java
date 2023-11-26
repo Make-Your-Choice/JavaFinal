@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Primary;
 
 import java.text.SimpleDateFormat;
 
+/**
+ * Класс-маппер
+ */
 @Configuration
 public class JacksonConfiguration {
     @Bean

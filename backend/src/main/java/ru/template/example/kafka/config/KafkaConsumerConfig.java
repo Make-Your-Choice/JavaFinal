@@ -14,15 +14,24 @@ import org.springframework.kafka.listener.ContainerProperties;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс конфигурации получателя сообщений из кафки
+ */
 @EnableKafka
 @Configuration
-
 public class KafkaConsumerConfig {
+    /**
+     * Адрес сервера
+     */
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    /**
+     * Настройка конфигурации получателя
+     *
+     * @return фабрика получателей
+     */
     public ConsumerFactory<String, String> consumerFactory() {
-
         Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 bootstrapServers);

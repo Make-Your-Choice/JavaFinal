@@ -7,11 +7,14 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+/**
+ * Класс для запуска приложения
+ */
 @SpringBootApplication(scanBasePackages = {
         "ru.template.example.*"
 })
-@EntityScan("ru.template.example.documents.entity")
-@EnableJpaRepositories("ru.template.example.documents.repository")
+/*@EntityScan("ru.template.example.documents.entity")
+@EnableJpaRepositories("ru.template.example.documents.repository")*/
 @EnableAspectJAutoProxy
 public class Application implements CommandLineRunner {
 

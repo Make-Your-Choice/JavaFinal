@@ -6,7 +6,7 @@ import org.apache.kafka.common.TopicPartition;
 import java.util.Collection;
 
 /**
- * При необходимости можно реагировать на перебалансировку если нельзя потерять оффсеты
+ * Класс слушатель перебалансировок
  */
 public class ConsumerRebalanceListenerImpl implements ConsumerRebalanceListener {
 

@@ -1,11 +1,15 @@
 package ru.template.example.documents.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
+/**
+ * Класс дто документа
+ */
 @Data
 @Builder
 @ToString
@@ -13,7 +17,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class DocumentDto {
     /**
-     * Номер
+     * Идентификатор
      */
     @NotNull
     private Long id;
@@ -38,14 +42,14 @@ public class DocumentDto {
     @NotNull
     private String patient;
     /**
-     * Дата документа
+     * Дата изменения документа
      */
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+7")
     private Date date;
     /**
      * Статус
      */
     @Valid
     private Status status;
-
 }

@@ -16,14 +16,21 @@ import javax.management.InstanceAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
- * Intercepts controller exception
+ * Класс перехвата исключений контроллера
  */
 @ControllerAdvice
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
+    /**
+     * Обработка исключения дублирующегося сообщения
+     *
+     * @param e тип выбрасываемого исключения
+     * @return ответ сервера
+     */
     @ExceptionHandler(InstanceAlreadyExistsException.class)
     public ResponseEntity<RestApiError> payloadExistsException(final InstanceAlreadyExistsException e) {
         logger.error("Duplicated payload error", e);
@@ -31,8 +38,14 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(restApiError, new HttpHeaders(), BAD_REQUEST);
     }
 
+    /**
+     * Обработка исключения некорректных параметров сообщения
+     *
+     * @param e тип выбрасываемого исключения
+     * @return ответ сервера
+     */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<RestApiError> incorrectStatusException(final IllegalArgumentException e) {
+    public ResponseEntity<RestApiError> incorrectArgumentsException(final IllegalArgumentException e) {
         logger.error("Incorrect payload arguments error", e);
         RestApiError restApiError = new RestApiError("Incorrect payload arguments error", List.of(e.getMessage()));
         return new ResponseEntity<>(restApiError, new HttpHeaders(), BAD_REQUEST);

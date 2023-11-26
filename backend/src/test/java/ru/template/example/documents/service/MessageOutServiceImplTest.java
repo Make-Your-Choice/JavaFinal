@@ -13,20 +13,38 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Класс, тестирующий сервис по работе с исходящими сообщениями
+ */
 @SpringBootTest
 public class MessageOutServiceImplTest {
+    /**
+     * Сервис по работе с исходящими сообщениями
+     */
     private MessageOutServiceImpl messageOutService;
+    /**
+     * Репозиторий для работы с исходящими сообщениями
+     */
     @Autowired
     private MessageOutRepository messageOutRepository;
+    /**
+     * Отправитель сообщений в кафку
+     */
     @Autowired
     private KafkaProducer producer;
 
+    /**
+     * Инициализация
+     */
     @BeforeEach
     public void before() {
         messageOutService = new MessageOutServiceImpl(messageOutRepository, producer);
         messageOutRepository.deleteAll();
     }
 
+    /**
+     * Тест на сохранение и получение исходящего сообщения
+     */
     @Test
     public void saveGetTest() {
         MessageOutDto dto = new MessageOutDto(1L, "docs_in", "{}", false);
@@ -38,6 +56,9 @@ public class MessageOutServiceImplTest {
         assertEquals(dto.getIsSent(), saved.getIsSent());
     }
 
+    /**
+     * Тест на получение списка исходящих сообщений
+     */
     @Test
     public void findAll() {
         MessageOutDto dto1 = new MessageOutDto(1L, "docs_in", "{1}", false);
@@ -50,6 +71,9 @@ public class MessageOutServiceImplTest {
         assertNotNull(messages.get(1));
     }
 
+    /**
+     * Тест на получение первого неотправленного исходящего сообщения
+     */
     @Test
     public void getFirstNotSent() {
         MessageOutDto dto1 = new MessageOutDto(1L, "docs_in", "{1}", false);
@@ -63,6 +87,9 @@ public class MessageOutServiceImplTest {
         assertEquals(dto1.getIsSent(), notSent.get().getIsSent());
     }
 
+    /**
+     * Тест на обработку еще не отправленных исходящих сообщений
+     */
     @Test
     public void checkOutMessages() {
         MessageOutDto message = new MessageOutDto(1L, "docs_in", "{}", false);

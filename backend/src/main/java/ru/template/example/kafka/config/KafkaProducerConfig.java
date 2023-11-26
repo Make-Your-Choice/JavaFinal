@@ -12,11 +12,22 @@ import org.springframework.kafka.core.ProducerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс конфигурации отправителя сообщений в кафку
+ */
 @Configuration
 public class KafkaProducerConfig {
+    /**
+     * Адрес сервера
+     */
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    /**
+     * Настройка конфигурации отправителя
+     *
+     * @return фабрика отправителей
+     */
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();

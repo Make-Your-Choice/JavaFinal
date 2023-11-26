@@ -28,7 +28,10 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:1.18.28")
     annotationProcessor("org.projectlombok:lombok:1.18.28")
-    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: "com.vaadin.external.google",
+                module: "android-json"
+    }
     testImplementation('org.testcontainers:postgresql:1.17.6')
 
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
@@ -54,6 +57,7 @@ dependencies {
     implementation("org.json:json:20231013")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.springframework.boot:spring-boot-starter-aop:2.7.16")
+
 
 }
 

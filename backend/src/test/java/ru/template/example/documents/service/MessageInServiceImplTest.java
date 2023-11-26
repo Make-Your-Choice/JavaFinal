@@ -15,20 +15,38 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Класс, тестирующий сервис по работе со входящими сообщениями
+ */
 @SpringBootTest
 public class MessageInServiceImplTest {
+    /**
+     * Сервис по работе со входящими сообщениями
+     */
     private MessageInServiceImpl messageInService;
+    /**
+     * Репозиторий для работы со входящими сообщениями
+     */
     @Autowired
     private MessageInRepository messageInRepository;
+    /**
+     * Сервис по работе с документами
+     */
     @Autowired
     private DocumentServiceImpl documentService;
 
+    /**
+     * Инициализация
+     */
     @BeforeEach
     public void before() {
         messageInService = new MessageInServiceImpl(messageInRepository, documentService);
         messageInRepository.deleteAll();
     }
 
+    /**
+     * Тест на сохранение и получение входящего сообщения
+     */
     @Test
     public void saveGetTest() {
         MessageInDto dto = new MessageInDto(1L, "{}", false);
@@ -39,6 +57,9 @@ public class MessageInServiceImplTest {
         assertEquals(dto.getIsAccepted(), saved.getIsAccepted());
     }
 
+    /**
+     * Тест на получение спписка входящих сообщений
+     */
     @Test
     public void findAll() {
         MessageInDto dto1 = new MessageInDto(1L, "{1}", false);
@@ -51,6 +72,9 @@ public class MessageInServiceImplTest {
         assertNotNull(messages.get(1));
     }
 
+    /**
+     * Тест на получение первого непринятого входящего сообщения
+     */
     @Test
     public void getFirstNotAccepted() {
         MessageInDto dto1 = new MessageInDto(1L, "{1}", false);
@@ -63,6 +87,9 @@ public class MessageInServiceImplTest {
         assertEquals(dto1.getIsAccepted(), notAccepted.get().getIsAccepted());
     }
 
+    /**
+     * Тест на получение входящего сообщения по его тексту
+     */
     @Test
     public void getFirstByPayload() {
         MessageInDto dto = new MessageInDto(1L, "{}", false);
@@ -72,6 +99,9 @@ public class MessageInServiceImplTest {
         assertEquals(dto.getPayload(), messageByPayload.get().getPayload());
     }
 
+    /**
+     * Тест на обработку еще не принятых входящих сообщений
+     */
     @Test
     public void checkInMessages() {
         DocumentDto documentDto = new DocumentDto(1L, "type1", "organization1", "description1", "patient1", new Date(), Status.of("NEW", "Новый"));

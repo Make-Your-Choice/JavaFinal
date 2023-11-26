@@ -10,12 +10,22 @@ import org.springframework.kafka.core.KafkaAdmin;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс конфигурации раздела для отправки/получения сообщений
+ */
 @Configuration
 public class KafkaTopicConfig {
-
+    /**
+     * Адрес сервера
+     */
     @Value(value = "${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
+    /**
+     * Настройка админа
+     *
+     * @return админ
+     */
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = new HashMap<>();
@@ -23,11 +33,21 @@ public class KafkaTopicConfig {
         return new KafkaAdmin(configs);
     }
 
+    /**
+     * Создание раздела для отправки сообщений отправителем
+     *
+     * @return новый раздел
+     */
     @Bean
     public NewTopic topic_in() {
         return new NewTopic("docs_in", 1, (short) 1);
     }
 
+    /**
+     * Создание раздела для получения сообщений получателем
+     *
+     * @return новый раздел
+     */
     @Bean
     public NewTopic topic_out() {
         return new NewTopic("docs_out", 1, (short) 1);

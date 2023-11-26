@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Класс с веб корнфигурацией
+ */
 @Configuration
 @ConditionalOnProperty(value = "cors.allow", havingValue = "true", matchIfMissing = false)
 public class WebConfiguration implements WebMvcConfigurer {
